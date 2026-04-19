@@ -1,115 +1,128 @@
 ---
 title: Gestión Alquileres SaaS
-description: Sistema SaaS para gestión de propiedades en alquiler con API REST y frontend
+description: SaaS multi-tenant de gestión de alquileres — .NET 8 Clean Architecture + React 19 + PostgreSQL
 wiki_managed: true
 ---
 
 # Gestión Alquileres SaaS
 
-Sistema web para gestionar propiedades en alquiler. Permite registrar propietarios, inquilinos, contratos, pagos y generar reportes de ocupación y deudas.
+SaaS multi-tenant para gestión de propiedades en alquiler. Automatiza cálculos de ajuste
+por índices argentinos (ICL/IPC del BCRA/INDEC) y comunicación con inquilinos.
 
 ## Stack
 
-| Capa | Tecnología |
-|------|------------|
-| Orquestación | Docker Compose |
-| Backend | Node.js + Express (API REST) |
-| Base de datos | MySQL |
-| Frontend | React |
-| Proxy | Nginx |
-| Deploy | VPS con Docker |
-
-## Módulos
-
-- **Propiedades**: CRUD de inmuebles con fotos y características
-- **Contratos**: vigencia, monto, ajustes por inflación (ICL)
-- **Pagos**: registro de cobros, estado de cuenta por inquilino
-- **Reportes**: deudas pendientes, ocupación mensual, ingresos por período
-- **Alertas**: contratos por vencer, pagos atrasados
-
-## Variables de entorno
-
-```env
-# Base de datos
-DB_HOST=db
-DB_PORT=3306
-DB_NAME=alquileres
-DB_USER=admin
-DB_PASSWORD=password_segura
-
-# Backend
-JWT_SECRET=clave_jwt_larga
-NODE_ENV=production
-PORT=3001
-
-# Frontend
-REACT_APP_API_URL=http://localhost/api
-```
+| Capa | Tecnología | Versión |
+|------|------------|---------|
+| Backend | .NET 8 Web API, Clean Architecture | 8.0 |
+| ORM | EF Core + PostgreSQL 16 | — |
+| CQRS | MediatR + FluentValidation | — |
+| Storage | MinIO (S3-compatible) | — |
+| Frontend | React + TypeScript + Vite | 19 / 4 |
+| Router | React Router | 7 |
+| Server state | TanStack Query | 5 |
+| Client state | Zustand | 5 |
+| Formularios | React Hook Form + Zod | — |
+| Infra dev | Docker Compose (postgres:16 + minio) | — |
 
 ## Correr localmente
 
 ```bash
-git clone git@github.com:bruno-avila21/gestion-alquileres-saas.git
-cd gestion-alquileres-saas
-cp .env.example .env
-# Completar .env
-
-./start.sh
-# o manualmente:
+# 1. Infraestructura (PostgreSQL + MinIO)
 docker compose up -d
+
+# 2. API (.NET 8)
+cd api
+dotnet build
+dotnet ef database update --project src/GestionAlquileres.Infrastructure
+dotnet run --project src/GestionAlquileres.API    # http://localhost:5000
+
+# 3. Web (React 19)
+cd web
+pnpm install
+pnpm dev    # http://localhost:5173
 ```
 
-- App: `http://localhost`
-- API: `http://localhost/api`
-
-## Comandos
+O desde la raíz:
 
 ```bash
-# Logs
-docker compose logs -f
-
-# Correr migraciones de DB
-docker compose exec backend npm run migrate
-
-# Seed de datos de prueba
-docker compose exec backend npm run seed
-
-# Backup de la base de datos
-docker compose exec db mysqldump -u admin -p alquileres > backup.sql
+./start.sh   # levanta todo
+./stop.sh    # para todo
 ```
 
-## Deploy en producción
+## Variables de entorno
+
+**API** — `api/src/GestionAlquileres.API/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=gestion_alquileres;Username=appuser;Password=devpassword"
+  },
+  "JwtSettings": {
+    "SecretKey": "clave_jwt_larga_y_aleatoria",
+    "Issuer": "gestion-alquileres"
+  },
+  "Minio": {
+    "Endpoint": "localhost:9000",
+    "AccessKey": "minioadmin",
+    "SecretKey": "minioadmin"
+  }
+}
+```
+
+**Web** — `web/.env`:
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
+
+## Arquitectura
+
+```
+api/src/
+├── GestionAlquileres.Domain/         # Entidades, interfaces, enums
+├── GestionAlquileres.Application/    # CQRS: Commands, Queries, Handlers, Validators
+├── GestionAlquileres.Infrastructure/ # EF Core, repositorios, BCRA/INDEC clients, MinIO
+└── GestionAlquileres.API/            # Controllers (solo MediatR.Send), Middleware
+
+web/src/
+├── features/{nombre}/                # Components, hooks, services, types por feature
+├── shared/                           # api.ts, queryClient, authStore, UI components
+├── portal-admin/                     # Rutas y páginas del panel admin
+└── portal-inquilino/                 # Rutas y páginas del portal de inquilinos
+```
+
+## Multi-tenancy
+
+- Discriminador: `OrganizationId` (Guid) en todas las entidades
+- Se extrae del claim `org_id` del JWT en `BaseController` — nunca del request body
+- EF Core filtra automáticamente con `HasQueryFilter` en `AppDbContext`
+
+## Módulos
+
+- **Contratos**: vigencia, monto, tipo de ajuste (ICL/IPC/Manual), frecuencia
+- **Inquilinos**: portal individual con estado de cuenta y comprobantes
+- **Propiedades**: inmuebles con documentos privados (URLs pre-firmadas MinIO, 5 min)
+- **Ajuste automático**: scheduler mensual, sincronización de índices BCRA/INDEC
+- **Transacciones**: historial de pagos, cargos y ajustes
+
+## Lógica de ajuste (crítica)
+
+- **ICL:** `NuevoAlquiler = AlquilerActual × (ICL_T / ICL_T-4)` (trimestral, 1 año atrás)
+- **IPC:** acumula variación mensual según frecuencia del contrato
+- Los índices se persisten en tabla `Indexes` ANTES de calcular
+- Si API BCRA falla → último valor disponible + warning en logs
+
+## Comandos útiles
 
 ```bash
-# Clonar en el servidor
-git clone git@github.com:bruno-avila21/gestion-alquileres-saas.git
-cd gestion-alquileres-saas
+# API — nueva migración
+cd api && dotnet ef migrations add NombreMigracion --project src/GestionAlquileres.Infrastructure
 
-# Configurar variables de producción
-cp .env.example .env
-nano .env
+# API — tests
+cd api && dotnet test
 
-# Levantar
-docker compose up -d --build
-```
+# Web — build y lint
+cd web && pnpm build && pnpm lint
 
-## Estructura
-
-```
-gestion-alquileres-saas/
-├── backend/
-│   ├── src/
-│   │   ├── routes/          # propiedades, contratos, pagos
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   └── middleware/
-│   ├── migrations/
-│   └── package.json
-├── frontend/
-│   └── src/
-├── nginx/
-│   └── nginx.conf
-├── docker-compose.yml
-├── .env.example
-└── start.sh
+# MinIO — consola web
+# http://localhost:9001 (minioadmin / minioadmin)
 ```
