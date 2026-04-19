@@ -1,104 +1,139 @@
 ---
 title: Claude Agents
-description: Monorepo de agentes y skills IA construidos con Claude — web2react, code-reviewer y más
+description: Monorepo de agentes y skills AI-powered construidos con Claude — web2react, code-reviewer, marketing-agents y más
 wiki_managed: true
 ---
 
 # claude-agents
 
-Monorepo de agentes y skills AI-powered construidos con Claude. Agentes ejecutables por CLI, skills reutilizables entre agentes.
+Monorepo TypeScript de agentes y skills AI-powered construidos con Claude.
+Agentes ejecutables por CLI o importables como librería. Skills reutilizables entre agentes.
+
+## Stack
+
+- TypeScript 5 strict, ESM
+- pnpm workspaces
+- Biome (lint + format)
+- Vitest
+- Anthropic SDK oficial (via `@claude-agents/shared`)
+- Playwright (captura web)
+
+## Setup
+
+```bash
+git clone git@github.com:bruno-avila21/claude-agents.git
+cd claude-agents
+pnpm install
+cp .env.example .env
+# Agregar ANTHROPIC_API_KEY
+pnpm build
+```
+
+## Variables de entorno
+
+```env
+ANTHROPIC_API_KEY=sk-ant-api03-...
+```
 
 ## Estructura
 
 ```
 claude-agents/
-├── shared/                      # tipos, Anthropic client, logger
+├── shared/                       # Anthropic client, logger, tipos comunes
 ├── skills/
-│   ├── playwright-capture/      # captura de webs con hidratación, lazy load, multi-viewport
-│   ├── html-sanitizer/          # limpia clases autogeneradas, trackers, inline styles
-│   ├── design-tokens/           # extrae paleta/fonts/spacing por frecuencia + tailwind config
-│   └── jsx-validator/           # valida JSX/TSX con Babel + TS compiler API + retry loop
+│   ├── playwright-capture/       # captura web: hidratación, lazy load, multi-viewport
+│   ├── html-sanitizer/           # limpia clases autogeneradas, trackers, inline styles
+│   ├── design-tokens/            # extrae paleta/fonts/spacing + tailwind config
+│   ├── jsx-validator/            # valida JSX/TSX con Babel + retry loop
+│   └── marketing-skills/         # auditors y frameworks para análisis de marketing
 └── agents/
-    ├── web2react/               # clona una web y genera componentes React reutilizables
-    └── code-reviewer/           # analiza un repo y genera SKILL.md/AGENTS.md específico
+    ├── web2react/                 # clona web → componentes React reutilizables
+    ├── code-reviewer/             # repo → SKILL.md / AGENTS.md
+    ├── marketing-agents/          # content-generator, landing-auditor, pricing-advisor
+    └── marketing-orchestrator/    # orquesta marketing-agents con feedback loop
 ```
 
-## Setup
-
-```bash
-pnpm install
-cp .env.example .env
-# Editar .env con tu ANTHROPIC_API_KEY
-pnpm build
-```
-
-## Uso
+## Agentes
 
 ### web2react
 
+Clona un sitio web y genera componentes React reutilizables.
+
 ```bash
-# Instalar Playwright browsers (solo primera vez)
+# Instalar Playwright (solo primera vez)
 pnpm --filter @claude-agents/playwright-capture exec playwright install chromium
 
-# Clonar una web
+# Clonar un sitio
 pnpm --filter @claude-agents/web2react start clone https://stripe.com \
   --out ./output/stripe \
   --framework next
 ```
 
+**Pipeline:** segment → capture → crop → generate → assemble
+
 ### code-reviewer
 
+Analiza un repo y genera `SKILL.md` / `AGENTS.md` específico para el proyecto.
+
 ```bash
-# Generar SKILL.md para cualquier proyecto
 pnpm --filter @claude-agents/code-reviewer start generate \
-  --path /ruta/a/tu/proyecto \
-  --out /ruta/a/tu/proyecto/SKILL.md \
-  --name SKILL.md
+  --path /ruta/al/proyecto \
+  --out /ruta/al/proyecto/AGENTS.md \
+  --name AGENTS.md
 ```
+
+### marketing-agents
+
+content-generator, landing-auditor, pricing-advisor. Importables como librería:
+
+```typescript
+import { runLandingAuditor } from '@claude-agents/marketing-agents'
+```
+
+### marketing-orchestrator
+
+Orquesta los marketing-agents con loop de feedback (decisor + metrics-store + feedback-loop).
 
 ## Scripts
 
-- `pnpm build` — compila todos los packages
-- `pnpm test` — corre Vitest en todo el monorepo
-- `pnpm lint` — Biome
-- `pnpm format` — Biome format write
+```bash
+pnpm build    # compila shared → skills → agents
+pnpm test     # Vitest en todo el monorepo
+pnpm lint     # Biome check
+pnpm format   # Biome format --write
+```
 
-## Agregar un skill nuevo
-
-Si ya tenés skills hechas, copialas a `skills/<nombre>/` respetando esta estructura mínima:
+## Agregar skill nuevo
 
 ```
 skills/<nombre>/
-├── package.json                 # name: @claude-agents/<nombre>
-├── tsconfig.json                # extiende ../../tsconfig.base.json
+├── package.json    # name: @claude-agents/<nombre>
+├── tsconfig.json   # extiende ../../tsconfig.base.json
 ├── src/index.ts
-└── tests/*.test.ts              # opcional pero recomendado
+└── tests/
 ```
 
-Después corré `pnpm install` para que pnpm workspaces lo detecte.
+```bash
+pnpm install   # pnpm workspaces detecta el nuevo package
+pnpm build
+```
 
-## Agregar un agente nuevo
+## Agregar agente nuevo
 
 ```
 agents/<nombre>/
-├── package.json                 # con bin pointando al CLI
-├── tsconfig.json
+├── package.json    # bin → dist/cli/main.js
+├── tsconfig.json   # references a skills usadas
 └── src/
-    ├── index.ts                 # exporta la API pública
+    ├── index.ts    # API pública
     ├── types.ts
-    ├── pipeline/                # una carpeta por etapa
-    └── cli/main.ts              # entrypoint CLI con commander
+    ├── pipeline/   # una etapa por archivo
+    └── cli/main.ts # commander entrypoint
 ```
 
-## Stack
+## Reglas clave
 
-- TypeScript estricto, ESM.
-- pnpm workspaces.
-- Biome (lint + format).
-- Vitest.
-- Anthropic SDK oficial.
-- GitHub Actions CI.
-
-## Licencia
-
-MIT
+- Llamadas a Claude: siempre via `@claude-agents/shared`, nunca instalar `@anthropic-ai/sdk` directamente
+- Tests que llaman a Claude: mockear con `vi.mock('@claude-agents/shared')`
+- Agents no dependen de otros agents — solo de skills y shared
+- TypeScript strict: no `any`, no `@ts-ignore`
