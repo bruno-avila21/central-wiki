@@ -1,182 +1,111 @@
 ---
 title: Stock Product
-description: Sistema de gestión de inventario con trazabilidad de precios y análisis de ganancias
+description: SaaS de gestión de inventario multi-tenant — monorepo con backend, dashboard, storefront y landing
 wiki_managed: true
 ---
 
-# Stock Product - Sistema de Gestión de Inventario
+# Stock Product — Monorepo SaaS
 
-Sistema de gestión de inventario con trazabilidad histórica de precios, comparativa de proveedores y análisis de ganancias.
+Plataforma SaaS de gestión de inventario multi-tenant. Cada tenant tiene su propia base de datos PostgreSQL y puede personalizar completamente su marca y storefront.
 
-## 🚀 Características
+## Sub-proyectos
 
-- **CRUD de Productos**: Gestión completa con nombre, marca, stock y categoría
-- **Cálculo de Margen**: Precio de venta automático basado en % de ganancia
-- **Desglose por Pack**: Cálculo de costo y precio unitario para productos en pack
-- **Historial de Precios**: Registro automático de cambios con comparativas
-- **Comparativa de Proveedores**: Análisis de precios por proveedor
-- **Alertas de Stock**: Notificaciones de productos con stock bajo
-- **Reportes**: Gráficas de ventas y análisis de rentabilidad
+| Carpeta | Rol | Puerto dev |
+|---------|-----|-----------|
+| `backend/` | API REST — Express + PostgreSQL, JWT, RBAC, multi-tenant | 3001 |
+| `frontend/` | Dashboard de administración — React 18 + Vite | 5173 |
+| `storefront/` | Tienda ecommerce customer-facing — React 18 + Vite | 3000 |
+| `landing/` | Landing page del SaaS (Vaultec) — React 18 + Vite | 4173 |
+| `n8n/` | Automatización de workflows | — |
+| `packages/sdk` | SDK TypeScript `@stock-product/sdk` | — |
+| `packages/create-sp-app` | CLI para crear nuevas instancias | — |
 
-## 📦 Tecnologías
+## Stack global
 
-| Componente | Tecnología |
-|------------|------------|
-| Frontend | React 18 + Vite + Tailwind CSS |
-| Backend | Node.js + Express |
-| Base de Datos | SQLite (better-sqlite3) |
-| Gráficas | Recharts |
-| Íconos | Lucide React |
+| Capa | Tecnología |
+|------|------------|
+| Backend | Node.js + Express, PostgreSQL (pool por tenant) |
+| Frontend / Storefront | React 18, Vite, Tailwind CSS |
+| Auth | JWT (access + refresh), RBAC por rol |
+| Multi-tenant | `X-Tenant-ID` header → DB dedicada por tenant |
+| Estilos | CSS variables `var(--color-*)` — sin inline styles |
+| Testing | Vitest — patrón AAA, cobertura mínima: éxito + edge + error |
+| CI/CD | GitHub Actions |
+| Deploy | Railway (backend + storefront), Cloudflare R2 (uploads) |
 
-## 🚀 Inicio Rápido (Windows)
-¡La forma más fácil de correr el proyecto!
+## Inicio rápido (Windows)
 
-1.  Busca el archivo **`iniciar_proyecto.bat`** en la carpeta principal.
-2.  Dale doble clic.
-3.  Se abrirán dos ventanas negras (terminales) y el proyecto estará listo.
+```bash
+# Forma rápida: doble clic en
+iniciar_proyecto.bat     # levanta backend + frontend
+detener_proyecto.bat     # libera puertos
 
----
+# Manual
+cd backend   && npm run dev   # :3001
+cd frontend  && npm run dev   # :5173
+cd storefront && npm run dev  # :3000
+cd landing   && npm run dev   # :4173
+```
 
-## 🛠️ Instalación Manual
-Si prefieres hacerlo paso a paso:
+## Convenciones de código (OBLIGATORIO en todo el monorepo)
 
-### Requisitos previos
-- Node.js 18+
-- npm o yarn
+| Prefijo | Uso | Ejemplo |
+|---------|-----|---------|
+| `i` | Variables internas / state | `iProducto`, `iCargando` |
+| `e` | Props / params externos | `eReq`, `eProducto` |
+| `c` | Configuración | `cPuerto`, `cBaseUrl` |
 
-### Backend
+- Funciones async: sufijo `Async` — `cargarProductosAsync`
+- Idioma: **español** para funciones, variables, archivos y tests
+- Respuestas API: `{ "exito": true, "datos": {} }` / `{ "exito": false, "mensaje": "..." }`
+
+## Multi-tenancy
+
+```
+acme.tuapp.com  → X-Tenant-ID: acme → pool_acme (DB)
+demo.tuapp.com  → X-Tenant-ID: demo → pool_demo (DB)
+localhost       → usa VITE_TENANT_ID o "demo"
+```
+
+**Reglas críticas:**
+- Nunca hardcodear una DB específica — siempre usar `eReq.pool`
+- Firma de helpers: `consultarTodos(sql, params, pool)` — pool siempre **tercero**
+- Cache: usar `Map` con clave por tenant — nunca variable de módulo compartida
+
+## Backend — endpoints principales
+
+```
+POST /api/auth/login               público
+GET  /api/productos                JWT + RBAC
+GET  /api/config/tema              público (CSS vars del tenant)
+GET  /api/tienda-config            público (branding del tenant)
+GET  /api/public/productos         catálogo público del tenant
+POST /api/signup                   registro self-service
+POST /api/webhooks/mercadopago     webhook MP
+GET  /api/planes                   planes SaaS disponibles
+/docs                              Scalar UI (OpenAPI)
+```
+
+## Migrations y provisioning
 
 ```bash
 cd backend
-npm install
-npm run dev
+npm run migrate          # migraciones en todos los tenants
+npm run provision        # provisionar nuevo tenant
+npm run migrate:r2       # migrar uploads locales → Cloudflare R2
+npm run seed:presets     # cargar presets de tema
 ```
 
-El servidor iniciará en `http://localhost:3001`
-
-### Frontend
+## Testing
 
 ```bash
-cd frontend
-npm install
-npm run dev
+cd backend   && npm test -- nombreArchivo
+cd frontend  && npm test -- NombreComponente
+cd storefront && npm test
+cd landing   && npm test
 ```
 
-La aplicación iniciará en `http://localhost:5173`
+## Documentación detallada
 
-## 📁 Estructura del Proyecto
-
-```
-stock-product/
-├── backend/
-│   ├── database/
-│   │   ├── esquema.sql
-│   │   └── inventario.db
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── baseDatos.js
-│   │   ├── controladores/
-│   │   │   ├── productosControlador.js
-│   │   │   ├── historialControlador.js
-│   │   │   ├── ventasControlador.js
-│   │   │   ├── proveedoresControlador.js
-│   │   │   └── categoriasControlador.js
-│   │   ├── rutas/
-│   │   │   ├── productosRutas.js
-│   │   │   ├── historialRutas.js
-│   │   │   ├── ventasRutas.js
-│   │   │   ├── proveedoresRutas.js
-│   │   │   └── categoriasRutas.js
-│   │   ├── servicios/
-│   │   │   └── servicioPrecios.js
-│   │   └── app.js
-│   ├── package.json
-│   └── server.js
-│
-└── frontend/
-    ├── src/
-    │   ├── componentes/
-    │   │   ├── Layout/
-    │   │   ├── Productos/
-    │   │   ├── Historial/
-    │   │   └── UI/
-    │   ├── paginas/
-    │   │   ├── Dashboard.jsx
-    │   │   ├── Productos.jsx
-    │   │   ├── Ventas.jsx
-    │   │   ├── Proveedores.jsx
-    │   │   └── Reportes.jsx
-    │   ├── servicios/
-    │   │   └── api.js
-    │   ├── utils/
-    │   │   └── calculosPrecios.js
-    │   ├── App.jsx
-    │   └── main.jsx
-    ├── package.json
-    └── vite.config.js
-```
-
-## 🔌 API Endpoints
-
-### Productos
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/productos` | Listar productos |
-| GET | `/api/productos/:id` | Obtener producto |
-| POST | `/api/productos` | Crear producto |
-| PUT | `/api/productos/:id` | Actualizar producto |
-| DELETE | `/api/productos/:id` | Eliminar producto |
-| POST | `/api/productos/actualizar-precio` | Actualizar precio (con historial) |
-| GET | `/api/productos/stock-bajo` | Productos con stock bajo |
-
-### Historial
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/historial/:productoId` | Historial de un producto |
-| GET | `/api/historial/:productoId/comparativa` | Comparativa última compra |
-| GET | `/api/historial/:productoId/estadisticas` | Estadísticas completas |
-
-### Ventas
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/ventas` | Listar ventas |
-| POST | `/api/ventas` | Registrar venta |
-| GET | `/api/ventas/resumen` | Resumen por período |
-
-### Proveedores
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/proveedores` | Listar proveedores |
-| POST | `/api/proveedores` | Crear proveedor |
-| PUT | `/api/proveedores/:id` | Actualizar proveedor |
-| DELETE | `/api/proveedores/:id` | Eliminar proveedor |
-| GET | `/api/proveedores/:id/estadisticas` | Estadísticas del proveedor |
-
-### Categorías
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/categorias` | Listar categorías |
-| POST | `/api/categorias` | Crear categoría |
-| PUT | `/api/categorias/:id` | Actualizar categoría |
-| DELETE | `/api/categorias/:id` | Eliminar categoría |
-
-## 📊 Base de Datos
-
-### Tablas principales
-
-- **productos**: Información actual de productos
-- **historial_precios**: Registro histórico de precios de compra
-- **ventas**: Registro de ventas realizadas
-- **proveedores**: Datos de proveedores
-- **categorias**: Categorías de productos
-
-## 🎨 Convenciones de Código
-
-- **Variables internas**: Prefijo `i` (ej: `iProducto`, `iCargando`)
-- **Variables externas/props**: Prefijo `e` (ej: `eProducto`, `eGuardar`)
-- **Funciones async**: Sufijo `Async` (ej: `cargarDatosAsync`, `obtenerProductosAsync`)
-- **Idioma**: Español para nombres de funciones y variables
-
-## 📝 Licencia
-
-MIT
+- [Storefront](/frontend/stock-product-storefront) — tienda ecommerce customer-facing, multi-tenant, white-label
+- [Landing](/frontend/stock-product-landing) — landing del SaaS, configurable desde `config.js`
