@@ -1,5 +1,5 @@
 ---
-title: Stock Product — Storefront
+title: Storefront
 description: Tienda ecommerce customer-facing multi-tenant con sistema de templates white-label
 wiki_managed: true
 ---
@@ -26,7 +26,7 @@ npm install
 npm run dev   # http://localhost:3000
 ```
 
-> El puerto 3000 entra en conflicto con `ecommerce-saas`. Nunca correr ambos a la vez.
+> El puerto 3000 entra en conflicto con `ecommerce-saas`. Nunca correr ambos a la vez. Usar `detener_proyecto.bat` para liberar puertos.
 
 ## Variables de entorno
 
@@ -62,7 +62,7 @@ storefront/src/
 │   └── ProductDetailPage.jsx      # Detalle con galería
 ├── templates/
 │   └── {nombre}/
-│       ├── Hero.jsx               # Hero propio del template (NUNCA importar LandingPage)
+│       ├── Hero.jsx               # Hero propio del template
 │       ├── Hero.css               # Estilos BEM con prefijo único
 │       ├── theme-defaults.css     # Variables --sf-* del tema
 │       └── index.jsx              # Orquestador del template
@@ -79,12 +79,19 @@ storefront/src/
 const ROUTES = { landing: 'landing', catalog: 'catalog', detail: 'detail' };
 const [page, setPage] = useState(ROUTES.landing);
 
-// Navegar
 navigate(ROUTES.catalog, { search: 'Toyota' });
 navigate(ROUTES.detail, { product: productoObj });
 ```
 
 **Nunca:** `window.location.href`, `<a href>`, `<Link>`, `useNavigate`.
+
+## Multi-tenant
+
+El tenant se detecta automáticamente por subdominio:
+- `acme.tuapp.com` → tenant: `acme`
+- `localhost` → usa `VITE_TENANT_ID` o `demo`
+
+El header `X-Tenant-ID` se inyecta en **todas** las peticiones desde `servicios/api.js`. No pasarlo manualmente.
 
 ## Config dinámica desde el backend
 
@@ -92,11 +99,11 @@ navigate(ROUTES.detail, { product: productoObj });
 const { brand, copy, theme, navItems } = useStoreConfig();
 
 // Campos válidos de brand:
-brand.name        // ✅
+brand.name        // ✅  nombre de la tienda
 brand.tagline     // ✅
 brand.description // ✅
-brand.logoUrl     // ✅
-brand.whatsapp    // ✅
+brand.logoUrl     // ✅  puede ser null
+brand.whatsapp    // ✅  "+5491112345678"
 
 brand.nombre      // ❌ NO EXISTE — devuelve undefined silencioso
 brand.descripcion // ❌ NO EXISTE
@@ -128,19 +135,31 @@ border-radius: var(--sf-radius);
 
 Cada template DEBE tener: `Hero.jsx`, `Hero.css`, `theme-defaults.css`, `index.jsx`.
 
+**Nunca** importar `LandingPage.jsx` en un template — es solo para `automotriz-clasico`.
+
 ## Comunicación con el backend
 
 Todo via `servicios/api.js`. **Nunca `fetch` directo en componentes.**
 
-El token JWT se gestiona en memoria y se renueva automáticamente cada 55 minutos.
+Token JWT en memoria, se renueva automáticamente cada 55 minutos.
 
 ```js
-// Funciones exportadas
 fetchProductos(params)          // { search, category, priceMax }
 fetchProducto(id)
 fetchImagenesProducto(id)
 fetchCategorias()
 ```
+
+## Schema Mapper
+
+El backend devuelve campos en español; `mapProducto()` los transforma al schema del storefront:
+
+| Campo backend | Campo storefront |
+|---------------|-----------------|
+| `nombre` | `title` |
+| `precio_venta` | `price` |
+| `categoria_nombre` | `category` |
+| `imagen_principal` | `images[0]` |
 
 ## Bugs conocidos (no repetir)
 
@@ -150,6 +169,7 @@ fetchCategorias()
 | `brand.descripcion` → undefined | Campo no existe | Usar `brand.description` |
 | Template importa LandingPage | LandingPage es solo automotriz-clasico | Crear propio `Hero.jsx` |
 | Puerto 3000 ocupado | Conflicto con ecommerce-saas | Usar `detener_proyecto.bat` |
+| Título duplicado en h1 | `hero_title` ya contiene `brand.name` | No combinar los dos |
 
 ## Verificación post-implementación
 

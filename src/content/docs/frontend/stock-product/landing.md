@@ -1,19 +1,19 @@
 ---
-title: Stock Product — Landing
+title: Landing
 description: Landing page del SaaS (Vaultec) — React + Vite, 100% configurable desde config.js
 wiki_managed: true
 ---
 
 # Landing
 
-Landing page del SaaS, publicada bajo la marca **Vaultec**. Es una SPA React + Vite con todas las secciones configurables desde un único archivo `src/config.js` — sin tocar JSX para personalizarla.
+Landing page del SaaS publicada bajo la marca **Vaultec**. SPA React + Vite con todas las secciones configurables desde `src/config.js` — sin tocar JSX para personalizarla.
 
 ## Stack
 
 | Tecnología | Detalle |
 |------------|---------|
-| React | 18.3 |
-| Vite | 5.3 |
+| React | 18.3.1 |
+| Vite | 5.4 |
 | Estilos | CSS puro (sin Tailwind) |
 | Testing | Vitest + Testing Library |
 
@@ -22,7 +22,7 @@ Landing page del SaaS, publicada bajo la marca **Vaultec**. Es una SPA React + V
 ```bash
 cd landing
 npm install
-npm run dev      # http://localhost:5173 (Vite default)
+npm run dev      # http://localhost:5173
 npm run preview  # http://localhost:4173 (build preview)
 ```
 
@@ -30,14 +30,18 @@ npm run preview  # http://localhost:4173 (build preview)
 
 ```bash
 npm run build    # genera dist/
-npm run start    # sirve el build (Railway-ready, puerto $PORT o 4173)
+npm run start    # sirve el build (Railway: $PORT o 4173)
 ```
 
-Deploy en Railway: conectar el repo y apuntar `rootDirectory` a `landing/`. Se deploya automáticamente en cada push.
+Deploy en Railway: apuntar `rootDirectory` a `landing/`. Se deploya en cada push a main.
+
+## Variables de entorno
+
+No requiere variables de entorno. Todo se configura en `src/config.js`.
 
 ## Secciones disponibles
 
-Todas controladas desde `src/config.js` con `visible: true/false`:
+Controladas desde `config.js` con `visible: true/false` y reordenables:
 
 | ID | Sección |
 |----|---------|
@@ -51,16 +55,15 @@ Todas controladas desde `src/config.js` con `visible: true/false`:
 
 ## Configuración — `src/config.js`
 
-Todo el contenido se edita acá. No hay variables de entorno ni backend.
+Todo el contenido del sitio vive acá:
 
 ```js
 export const config = {
-  // Contraseña del panel de setup (acceso rápido en /setup)
-  setupPassword: 'setup1234',
+  setupPassword: 'setup1234',      // contraseña del panel de setup
 
   brand: {
     nombre: 'VAULTEC',
-    logo: null,          // URL o null para texto
+    logo: null,                    // URL o null (usa texto)
     colors: {
       primary: '#4C3AE8',
       accent:  '#D4FF3F',
@@ -69,38 +72,41 @@ export const config = {
     }
   },
 
-  // Secciones visibles (reordenable)
   sections: [
-    { id: 'nav',       visible: true },
-    { id: 'hero',      visible: true },
-    { id: 'pricing',   visible: true },
-    // ...
+    { id: 'nav',      visible: true },
+    { id: 'hero',     visible: true },
+    { id: 'marquee',  visible: true },
+    { id: 'features', visible: true },
+    { id: 'pricing',  visible: true },
+    { id: 'footerCta',visible: true },
+    { id: 'footer',   visible: true },
   ],
 
-  // Contacto
   whatsapp: '+5491155550000',
   email: 'bruno@vaultec.com',
+  whatsappMensaje: 'Hola, me interesa saber más sobre Vaultec',
 
-  // Hero
   heroLine1: 'Crezcamos',
   heroItalic: 'juntos.',
   heroDescripcion: '...',
 
-  // Planes (array)
   planes: [
-    { nombre: 'Starter', precio: '$15k', ... },
-    { nombre: 'Pro',     precio: '$35k', featured: true, ... },
-    { nombre: 'Enterprise', precio: 'Custom', ... },
+    { nombre: 'Starter',   precio: '$15k', featured: false },
+    { nombre: 'Pro',       precio: '$35k', featured: true  },
+    { nombre: 'Enterprise',precio: 'Custom', featured: false },
   ],
 
-  // Footer
-  footerLinks: { producto: [...], empresa: [...], legal: [...] }
+  footerLinks: {
+    producto: [...],
+    empresa: [...],
+    legal: [...],
+  }
 }
 ```
 
 ## Panel de setup
 
-Disponible en `?setup=1` (o ruta `/setup`). Protegido por `setupPassword`. Permite editar colores y textos visualmente sin tocar el código — guarda en `localStorage` como override temporal.
+Accesible con `?setup=1` en la URL. Protegido por `setupPassword`. Permite editar colores y textos visualmente sin tocar código. Los cambios se guardan en `localStorage` como override temporal.
 
 ## Estructura
 
@@ -109,7 +115,7 @@ landing/src/
 ├── App.jsx            # Orquestador de secciones
 ├── config.js          # Toda la configuración del sitio
 ├── presets.js         # Presets de temas alternativos
-├── useConfig.js       # Hook que merge config + localStorage overrides
+├── useConfig.js       # Hook: config + localStorage overrides
 ├── ContactModal.jsx   # Modal de contacto (WhatsApp / email)
 ├── SetupPanel.jsx     # Panel visual de configuración
 ├── index.css          # Variables CSS globales
@@ -117,10 +123,10 @@ landing/src/
 └── __tests__/         # Tests con Vitest + Testing Library
 ```
 
-## Tests
+## Testing
 
 ```bash
 cd landing
-npm test           # Vitest
-npm run test:watch # modo watch
+npm test              # Vitest run
+npm run test:watch    # Modo watch
 ```
