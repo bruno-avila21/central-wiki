@@ -1,6 +1,7 @@
 ---
 title: AgentSync
-description: Documentación de AgentSync
+description: App Windows de bandeja que sincroniza prompts/MCPs entre máquinas de desarrollo
+wiki_managed: true
 ---
 
 # AgentSync

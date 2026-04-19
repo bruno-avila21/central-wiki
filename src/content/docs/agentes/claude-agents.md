@@ -1,6 +1,7 @@
 ---
 title: Claude Agents
-description: Documentación de claude-agents
+description: Monorepo de agentes y skills IA construidos con Claude — web2react, code-reviewer y más
+wiki_managed: true
 ---
 
 # claude-agents

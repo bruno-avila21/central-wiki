@@ -1,21 +1,74 @@
 ---
 title: Invitaciones
-description: Documentación de invitaciones
+description: Builder de invitaciones digitales personalizadas con editor visual
+wiki_managed: true
 ---
 
-# React + Vite
+# Invitation Builder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Herramienta para crear invitaciones digitales personalizadas. El usuario completa un formulario con los datos del evento, previsualiza la tarjeta en tiempo real y puede compartir o imprimir la invitación.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Capa | Tecnología |
+|------|------------|
+| Framework | React 18 |
+| Build tool | Vite |
+| Estilos | CSS Modules / Tailwind CSS |
+| Lenguaje | JavaScript (ESM) |
+| Deploy | GitHub Pages / Netlify |
 
-## React Compiler
+## Qué hace
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Formulario de datos del evento (nombre, fecha, lugar, etc.)
+- Preview en vivo de la invitación mientras escribís
+- Múltiples plantillas de diseño para elegir
+- Exportar como imagen o PDF
+- Sin backend — todo en el browser
 
-## Expanding the ESLint configuration
+## Correr localmente
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+git clone git@github.com:bruno-avila21/invitaciones.git
+cd invitaciones
+npm install
+npm run dev
+```
+
+Abre `http://localhost:5173`.
+
+## Variables de entorno
+
+No requiere variables de entorno. Es 100% frontend estático.
+
+## Build y deploy
+
+```bash
+# Build estático
+npm run build
+# Los archivos quedan en dist/
+
+# Preview del build
+npm run preview
+
+# Deploy manual a GitHub Pages
+npm run deploy   # si está configurado gh-pages en package.json
+```
+
+## Estructura
+
+```
+invitaciones/
+├── src/
+│   ├── components/
+│   │   ├── Form/         # campos del formulario
+│   │   ├── Preview/      # previsualización de la invitación
+│   │   └── Templates/    # plantillas de diseño
+│   ├── hooks/
+│   │   └── useInvitacion.js
+│   ├── App.jsx
+│   └── main.jsx
+├── public/
+│   └── assets/           # imágenes y fuentes
+└── vite.config.js
+```

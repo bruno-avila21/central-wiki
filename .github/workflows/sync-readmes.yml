@@ -54,7 +54,15 @@ jobs:
           TARGET_DIR="src/content/docs/$CATEGORY"
           mkdir -p "$TARGET_DIR"
           FILENAME=$(echo "$REPO" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-          printf '%s\n' "$FINAL_CONTENT" > "$TARGET_DIR/${FILENAME}.md"
+
+          # Skip if page is manually managed (wiki_managed: true in frontmatter)
+          TARGET_FILE="$TARGET_DIR/${FILENAME}.md"
+          if [ -f "$TARGET_FILE" ] && grep -q "wiki_managed: true" "$TARGET_FILE"; then
+            echo "Skipping $REPO — wiki_managed: true"
+            exit 0
+          fi
+
+          printf '%s\n' "$FINAL_CONTENT" > "$TARGET_FILE"
 
           # Commit if there are changes
           git config user.name "github-actions[bot]"

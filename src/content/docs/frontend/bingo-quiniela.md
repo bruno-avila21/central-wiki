@@ -1,41 +1,69 @@
 ---
 title: Bingo Quiniela
-description: Documentación de bingo-quiniela
+description: Juego de bingo/quiniela interactivo con gestión de partidas y cartones
+wiki_managed: true
 ---
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bingo Quiniela
 
-## Getting Started
+Aplicación web de bingo interactivo con flujo completo de partidas: generación de cartones, sorteo de números y verificación de ganadores en tiempo real.
 
-First, run the development server:
+## Stack
+
+| Capa | Tecnología |
+|------|------------|
+| Framework | Next.js 14 (App Router) |
+| Lenguaje | TypeScript |
+| Estilos | Tailwind CSS |
+| Runtime | Node.js 18+ |
+| Deploy | Vercel |
+
+## Qué hace
+
+- Genera cartones de bingo únicos con distribución aleatoria
+- Sorteo de números con historial visible
+- Validación automática de cartones ganadores (línea, bingo)
+- Interfaz responsive para jugar desde el celular
+
+## Correr localmente
 
 ```bash
+git clone git@github.com:bruno-avila21/bingo-quiniela.git
+cd bingo-quiniela
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Este proyecto no requiere variables de entorno para desarrollo local. Todo corre en el browser.
 
-## Learn More
+## Build y deploy
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Build de producción
+npm run build
+npm start
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Deploy en Vercel (automático con push a main)
+# Conectar el repo en vercel.com → se deploya solo
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estructura
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+bingo-quiniela/
+├── app/
+│   ├── page.tsx          # pantalla principal
+│   ├── juego/            # lógica de partida
+│   └── layout.tsx
+├── components/
+│   ├── Carton.tsx        # componente de cartón individual
+│   ├── Sorteo.tsx        # bola de sorteo animada
+│   └── Tablero.tsx       # tablero de números sorteados
+├── lib/
+│   └── bingo.ts          # lógica de generación y validación
+└── public/
+```

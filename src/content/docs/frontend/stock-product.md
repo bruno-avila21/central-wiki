@@ -1,6 +1,7 @@
 ---
 title: Stock Product
-description: Documentación de stock-product
+description: Sistema de gestión de inventario con trazabilidad de precios y análisis de ganancias
+wiki_managed: true
 ---
 
 # Stock Product - Sistema de Gestión de Inventario

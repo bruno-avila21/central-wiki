@@ -12,6 +12,7 @@ export default defineConfig({
       ],
       sidebar: [
         { label: 'Inicio', link: '/' },
+        { label: 'Qué hay de nuevo', link: '/novedades' },
         {
           label: 'Frontend',
           autogenerate: { directory: 'frontend' },
