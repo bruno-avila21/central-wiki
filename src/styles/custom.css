@@ -28,8 +28,8 @@
   --sl-color-white:  #0f0a1e;
 }
 
-/* --- 3. Deep Space — dark mode (`:root` sin data-theme = dark en Starlight) --- */
-:root {
+/* --- 3. Deep Space — dark mode SOLO cuando no es light --- */
+:root:not([data-theme='light']) {
   --sl-color-black:  #08080f;
   --sl-color-gray-6: #111028;
   --sl-color-gray-5: #1c1840;
@@ -110,6 +110,11 @@ header.header {
   margin-top: 2rem;
   padding-left: calc(1rem + 3px);
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hero .sl-flex.actions a {
+  white-space: nowrap;
 }
 
 /* botón primario */
