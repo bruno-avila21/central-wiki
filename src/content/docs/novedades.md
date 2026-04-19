@@ -4,8 +4,6 @@ description: Registro de novedades y actualizaciones del ecosistema de proyectos
 wiki_managed: true
 ---
 
-# Qué hay de nuevo
-
 Registro cronológico de lo más relevante que se fue sumando al ecosistema.
 
 ---
