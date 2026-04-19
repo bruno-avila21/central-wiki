@@ -1,123 +1,83 @@
 ---
 title: Simulador de Crédito
-description: API REST + demo web para simulación de cuotas y condiciones de créditos
+description: Widget React embebible para simulación de créditos — IIFE + ESM + demo standalone + Vercel Functions
 wiki_managed: true
 ---
 
 # Simulador de Crédito
 
-Herramienta para calcular cuotas, intereses y condiciones de créditos en pesos argentinos. Incluye API REST para integraciones y una demo web estática para uso directo.
+Widget React embebible para simulación de créditos en pesos argentinos. Se distribuye como IIFE
+(`<script>` tag en cualquier sitio) o ESM (import), y también como app standalone.
+Incluye una Vercel Function para obtener TNA desde la API del BCRA.
 
 ## Stack
 
-| Capa | Tecnología |
-|------|------------|
-| API | Node.js + Express |
-| Demo web | HTML + CSS + JS vanilla |
-| Cálculos | Sistema francés / alemán / americano |
-| Deploy | Railway / Render / VPS |
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| React | 19 | UI del widget |
+| TypeScript | 5.x | Lenguaje |
+| Vite | 6.x | Build tool (library mode) |
+| Recharts | 2.x | Gráficos de amortización |
+| Vitest + Testing Library | 2.x | Tests |
+| @vercel/node | 4.x | Vercel Functions |
+| pnpm | — | Package manager |
+| Vercel | — | Deploy |
 
-## Qué calcula
+## Builds de salida
 
-- Cuota fija (sistema francés)
-- Amortización variable (sistema alemán)
-- Interés al vencimiento (sistema americano)
-- TNA → TEM → CFT
-- Tabla de amortización mes a mes
-- Comparativa entre sistemas
-
-## API Endpoints
-
-### `POST /api/simular`
-
-```json
-{
-  "monto": 500000,
-  "tna": 95,
-  "plazo": 12,
-  "sistema": "frances"
-}
-```
-
-Respuesta:
-
-```json
-{
-  "cuota": 68432.50,
-  "totalIntereses": 321190,
-  "totalPagar": 821190,
-  "cft": 142.3,
-  "tabla": [
-    { "mes": 1, "cuota": 68432.50, "capital": 27682.50, "interes": 40750, "saldo": 472317.50 },
-    ...
-  ]
-}
-```
-
-### `GET /api/tasas`
-
-Devuelve las tasas de referencia actuales (Badlar, UVA, etc.).
+| Archivo | Uso |
+|---------|-----|
+| `dist/simulador.iife.js` | Embebible vía `<script>` tag — define `window.SimuladorCredito` |
+| `dist/simulador.es.js` | ESM para import como paquete |
+| `demo/dist/` | App standalone hosteada en Vercel |
 
 ## Correr localmente
 
 ```bash
-git clone git@github.com:bruno-avila21/simulador-credito.git
-cd simulador-credito
-
-# API
-cd api
-npm install
-npm run dev   # http://localhost:3001
-
-# Demo web (en otra terminal)
-cd demo
-npx serve .   # http://localhost:3000
+pnpm install
+pnpm dev           # Demo standalone en http://localhost:5173
+pnpm build:widget  # dist/simulador.iife.js + dist/simulador.es.js
+pnpm build:demo    # demo/dist/
+pnpm test          # Vitest
 ```
 
-## Variables de entorno
+## Uso embebido
 
-```env
-PORT=3001
-NODE_ENV=development
-
-# Opcional: si fetchás tasas de una fuente externa
-TASAS_API_URL=https://api.bcra.gob.ar
-TASAS_API_KEY=tu_api_key
-```
-
-## Deploy
-
-```bash
-# Railway (recomendado)
-# 1. Conectar repo en railway.app
-# 2. Setear variables de entorno en el dashboard
-# 3. Deploy automático en cada push a main
-
-# Manual en VPS
-cd api
-npm install --production
-PORT=3001 node src/index.js
-
-# Con PM2
-pm2 start src/index.js --name simulador-credito -e PORT=3001
+```html
+<script src="simulador.iife.js"></script>
+<script>
+  window.SimuladorCredito.init({
+    container: '#mi-simulador',
+    config: {
+      montoMin: 10000,
+      montoMax: 5000000,
+      plazoOpciones: [6, 12, 18, 24, 36, 48],
+      tna: 0.45,
+      tema: 'light',
+    }
+  });
+</script>
 ```
 
 ## Estructura
 
 ```
-simulador-credito/
-├── api/
-│   ├── src/
-│   │   ├── routes/
-│   │   │   └── simular.js     # endpoint principal
-│   │   ├── services/
-│   │   │   ├── frances.js     # cálculo sistema francés
-│   │   │   ├── aleman.js      # cálculo sistema alemán
-│   │   │   └── americano.js
-│   │   └── index.js
-│   └── package.json
-└── demo/
-    ├── index.html
-    ├── style.css
-    └── app.js
+src/
+  components/     # Componentes React (sin business logic)
+  hooks/          # Lógica de estado y cálculos
+  utils/          # Funciones puras: cuotas, amortización, TNA→TEA
+  types/          # TypeScript interfaces
+  styles/         # CSS scoped (.sc-* — no colisiona con el host)
+  embed.ts        # Entry point IIFE
+  index.ts        # Entry point ESM
+demo/
+  vite.config.ts  # Config para la app standalone
+api/
+  tna.ts          # Vercel Function — TNA desde BCRA
+  _lib/bcra.ts    # Fetch a API del BCRA
 ```
+
+## Deploy
+
+Vercel — automático con push a `main`.
+Demo standalone y Vercel Functions se despliegan juntas.
