@@ -42,12 +42,7 @@ jobs:
             FINAL_CONTENT="$CONTENT"
           else
             REPO_TITLE=$(echo "$REPO" | tr '-' ' ' | sed 's/\b\(.\)/\u\1/g')
-            FINAL_CONTENT="---
-          title: $REPO_TITLE
-          description: Documentación de $REPO
-          ---
-
-          $CONTENT"
+            FINAL_CONTENT=$(printf '%s\n%s\n%s\n%s\n\n%s' '---' "title: $REPO_TITLE" "description: Documentación de $REPO" '---' "$CONTENT")
           fi
 
           # Write file to correct category
