@@ -11,7 +11,24 @@
   --sl-color-accent-high: #c4b5fd;
 }
 
-/* --- 2. Deep Space — dark mode (`:root` sin data-theme = dark en Starlight) --- */
+/* --- 2. Light mode — Violet Professional --- */
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+  --sl-color-accent-low: #ede9fe;
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #5b21b6;
+
+  --sl-color-black:  #ffffff;
+  --sl-color-gray-6: #f5f3ff;
+  --sl-color-gray-5: #ede9fe;
+  --sl-color-gray-4: #ddd6fe;
+  --sl-color-gray-3: #7c3aed;
+  --sl-color-gray-2: #4c1d95;
+  --sl-color-gray-1: #1e1b4b;
+  --sl-color-white:  #0f0a1e;
+}
+
+/* --- 3. Deep Space — dark mode (`:root` sin data-theme = dark en Starlight) --- */
 :root {
   --sl-color-black:  #08080f;
   --sl-color-gray-6: #111028;
@@ -275,7 +292,61 @@ sl-card:hover {
 .sl-markdown-content > *:nth-child(9)  { animation-delay: 0.45s; }
 .sl-markdown-content > *:nth-child(10) { animation-delay: 0.50s; }
 
-/* --- 9. Respeta prefers-reduced-motion --- */
+/* --- 9. Light mode — overrides de componentes con colores hardcodeados --- */
+:root[data-theme='light'] header.header {
+  background: rgba(245, 243, 255, 0.9) !important;
+  border-bottom-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+:root[data-theme='light'] .sidebar-content {
+  border-right-color: rgba(124, 58, 237, 0.15);
+}
+
+:root[data-theme='light'] .group-label span {
+  color: #5b21b6 !important;
+}
+
+:root[data-theme='light'] .hero h1 {
+  border-left-color: var(--sl-color-accent);
+}
+
+:root[data-theme='light'] .sl-markdown-content h2 {
+  border-bottom-color: rgba(124, 58, 237, 0.25);
+}
+
+:root[data-theme='light'] .sl-markdown-content h3 {
+  color: #5b21b6;
+}
+
+:root[data-theme='light'] .sl-markdown-content th {
+  background: rgba(124, 58, 237, 0.06) !important;
+  color: #5b21b6 !important;
+}
+
+:root[data-theme='light'] .sl-markdown-content td {
+  border-top-color: rgba(124, 58, 237, 0.12);
+}
+
+:root[data-theme='light'] .sl-markdown-content table {
+  border-color: rgba(124, 58, 237, 0.18);
+}
+
+:root[data-theme='light'] .sl-markdown-content :not(pre) > code {
+  background: rgba(124, 58, 237, 0.07) !important;
+  color: #5b21b6 !important;
+  border-color: rgba(124, 58, 237, 0.18);
+}
+
+:root[data-theme='light'] .expressive-code .frame {
+  border-color: rgba(124, 58, 237, 0.2) !important;
+}
+
+:root[data-theme='light'] .expressive-code .frame .header {
+  background: rgba(237, 233, 254, 0.8) !important;
+  border-bottom-color: rgba(124, 58, 237, 0.15) !important;
+}
+
+/* --- 10. Respeta prefers-reduced-motion --- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
