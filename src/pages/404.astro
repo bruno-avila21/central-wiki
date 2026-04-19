@@ -1,0 +1,21 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+
+<StarlightPage frontmatter={{ title: '404 — Página no encontrada' }}>
+  <div style="text-align: center; padding: 3rem 0;">
+    <p style="font-size: 5rem; font-weight: 800; color: var(--sl-color-accent); line-height: 1; margin: 0;">404</p>
+    <p style="font-size: 1.25rem; color: var(--sl-color-gray-2); margin: 1rem 0 2rem;">
+      Esta página no existe o fue movida.
+    </p>
+    <a href="/central-wiki/" style="
+      display: inline-block;
+      background: var(--sl-color-accent);
+      color: #fff;
+      padding: 0.6rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+    ">← Volver al inicio</a>
+  </div>
+</StarlightPage>
