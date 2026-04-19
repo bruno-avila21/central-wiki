@@ -32,6 +32,7 @@ jobs:
           # Fetch README (try main branch, then master)
           CONTENT=$(curl -sf "https://raw.githubusercontent.com/bruno-avila21/${REPO}/main/README.md" || \
                     curl -sf "https://raw.githubusercontent.com/bruno-avila21/${REPO}/master/README.md" || \
+                    curl -sf "https://raw.githubusercontent.com/bruno-avila21/${REPO}/desarrollo/README.md" || \
                     echo "")
 
           if [ -z "$CONTENT" ]; then
