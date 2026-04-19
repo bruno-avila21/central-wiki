@@ -1,0 +1,23 @@
+La guía 13-PASO-A-PASO-PROYECTO-NUEVO.md es el playbook práctico:
+
+  Día 1 (30 min):
+  - .claudeignore + CLAUDE.md + settings.json
+
+  Día 2 (30 min):
+  - AGENTS.md por app con templates de código real
+  - Agente orquestador + compilación
+
+  Día 3 (20 min):
+  - Primer skill + command (/dev)
+  - SKILLS-INDEX.md
+
+  Y el atajo más rápido: abrir Claude Code en un proyecto nuevo y decirle:
+
+  Leé las guías en C:/Users/USUARIO/Desktop/guias-claude-code/ y configurame
+  Claude Code completo para este proyecto. Es un [tu stack].
+  Seguí el paso a paso de la guía 13.
+
+  Claude lee las 13 guías, analiza tu proyecto, y genera todo adaptado. Vos revisás y ajustás.
+
+  En total tenés 13 guías que cubren todo el ecosistema de Claude Code. Con esto podés replicar y mejorar tu setup del laburo en cualquier proyecto
+  personal.

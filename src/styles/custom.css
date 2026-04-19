@@ -1,0 +1,293 @@
+/* ============================================================
+   Deep Space — Bruno Avila Dev Wiki
+   Palette: Deep Space | Style: Minimal Sharp | Anim: Slide In
+   ============================================================ */
+
+/* --- 1. Accent (ambos temas) --- */
+:root,
+::backdrop {
+  --sl-color-accent-low: #1e1b4b;
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #c4b5fd;
+}
+
+/* --- 2. Deep Space — dark mode (`:root` sin data-theme = dark en Starlight) --- */
+:root {
+  --sl-color-black:  #08080f;
+  --sl-color-gray-6: #111028;
+  --sl-color-gray-5: #1c1840;
+  --sl-color-gray-4: #2e2865;
+  --sl-color-gray-3: #5a4f8a;
+  --sl-color-gray-2: #9d8fc8;
+  --sl-color-gray-1: #e0d9f5;
+  --sl-color-white:  #f5f3ff;
+}
+
+/* --- 3. Navbar --- */
+.site-title {
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  color: var(--sl-color-white) !important;
+}
+
+.site-title:hover {
+  color: var(--sl-color-accent-high) !important;
+  transition: color 0.2s ease;
+}
+
+header.header {
+  border-bottom: 1px solid rgba(124, 58, 237, 0.18) !important;
+  background: rgba(8, 8, 15, 0.85) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* --- 4. Sidebar --- */
+.sidebar-content {
+  border-right: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+/* active link — barra izquierda violeta */
+.sidebar-content a[aria-current='page'] {
+  border-left: 2px solid var(--sl-color-accent) !important;
+  padding-left: calc(var(--sl-sidebar-pad-x) - 2px) !important;
+  color: var(--sl-color-accent-high) !important;
+  background: rgba(124, 58, 237, 0.08) !important;
+  font-weight: 600;
+}
+
+.sidebar-content a:hover:not([aria-current='page']) {
+  color: var(--sl-color-accent-high);
+  background: rgba(124, 58, 237, 0.05) !important;
+}
+
+/* group labels */
+.group-label span {
+  color: var(--sl-color-accent) !important;
+  font-weight: 700;
+  font-size: var(--sl-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* --- 5. Hero (splash page) --- */
+.hero {
+  padding-block: 4rem !important;
+}
+
+.hero h1 {
+  border-left: 3px solid var(--sl-color-accent);
+  padding-left: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1 !important;
+}
+
+.hero .tagline {
+  color: var(--sl-color-gray-2) !important;
+  font-size: var(--sl-text-lg) !important;
+  margin-top: 0.75rem;
+  padding-left: calc(1rem + 3px);
+}
+
+.hero .sl-flex.actions {
+  margin-top: 2rem;
+  padding-left: calc(1rem + 3px);
+  gap: 0.75rem;
+}
+
+/* botón primario */
+.hero a.sl-button[data-variant='primary'],
+.hero a[class*='primary'] {
+  background: var(--sl-color-accent) !important;
+  border-color: var(--sl-color-accent) !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.hero a.sl-button[data-variant='primary']:hover {
+  background: #6d28d9 !important;
+  transform: translateY(-1px);
+}
+
+/* botón minimal */
+.hero a.sl-button[data-variant='minimal'],
+.hero a[class*='minimal'] {
+  color: var(--sl-color-accent-high) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+  font-weight: 500;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.hero a.sl-button[data-variant='minimal']:hover {
+  border-color: var(--sl-color-accent) !important;
+  color: var(--sl-color-white) !important;
+}
+
+/* --- 6. Content --- */
+.sl-markdown-content h2 {
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+  padding-bottom: 0.4rem;
+  margin-top: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sl-markdown-content h3 {
+  color: var(--sl-color-accent-high);
+  font-weight: 600;
+}
+
+/* tablas */
+.sl-markdown-content table {
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.sl-markdown-content th {
+  background: rgba(124, 58, 237, 0.08) !important;
+  color: var(--sl-color-accent-high) !important;
+  font-weight: 600;
+  font-size: var(--sl-text-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sl-markdown-content td {
+  border-top: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+/* inline code */
+.sl-markdown-content :not(pre) > code {
+  background: rgba(124, 58, 237, 0.12) !important;
+  color: var(--sl-color-accent-high) !important;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 4px;
+  font-size: 0.85em;
+  padding: 0.1em 0.4em;
+}
+
+/* bloques de código */
+.expressive-code .frame {
+  border: 1px solid rgba(124, 58, 237, 0.2) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.expressive-code .frame .header {
+  background: rgba(30, 27, 75, 0.6) !important;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2) !important;
+}
+
+/* --- 7. Cards (starlight card component) --- */
+.sl-card,
+sl-card {
+  border: 1px solid rgba(124, 58, 237, 0.2) !important;
+  background: rgba(17, 16, 40, 0.8) !important;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.sl-card:hover,
+sl-card:hover {
+  border-color: rgba(124, 58, 237, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+/* --- 8. Animaciones — Slide In Left (Emil Kowalski style) --- */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero entra con fade up */
+.hero h1 {
+  animation: fadeUpIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero .tagline {
+  animation: fadeUpIn 0.7s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero .sl-flex.actions {
+  animation: fadeUpIn 0.7s 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Tabla de proyectos en el hero */
+.hero + * table tbody tr {
+  animation: slideInLeft 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero + * table tbody tr:nth-child(1) { animation-delay: 0.25s; }
+.hero + * table tbody tr:nth-child(2) { animation-delay: 0.32s; }
+.hero + * table tbody tr:nth-child(3) { animation-delay: 0.39s; }
+.hero + * table tbody tr:nth-child(4) { animation-delay: 0.46s; }
+
+/* Sidebar items — slide in al cargar */
+.sidebar-content nav a {
+  animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.sidebar-content nav li:nth-child(1) a  { animation-delay: 0.05s; }
+.sidebar-content nav li:nth-child(2) a  { animation-delay: 0.10s; }
+.sidebar-content nav li:nth-child(3) a  { animation-delay: 0.15s; }
+.sidebar-content nav li:nth-child(4) a  { animation-delay: 0.20s; }
+.sidebar-content nav li:nth-child(5) a  { animation-delay: 0.25s; }
+.sidebar-content nav li:nth-child(6) a  { animation-delay: 0.30s; }
+.sidebar-content nav li:nth-child(7) a  { animation-delay: 0.35s; }
+.sidebar-content nav li:nth-child(8) a  { animation-delay: 0.40s; }
+.sidebar-content nav li:nth-child(9) a  { animation-delay: 0.45s; }
+.sidebar-content nav li:nth-child(10) a { animation-delay: 0.50s; }
+
+/* Headings y párrafos del contenido — slide in */
+.sl-markdown-content > h2,
+.sl-markdown-content > h3,
+.sl-markdown-content > p,
+.sl-markdown-content > table,
+.sl-markdown-content > pre,
+.sl-markdown-content > ul,
+.sl-markdown-content > ol {
+  animation: slideInLeft 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger para los elementos de contenido */
+.sl-markdown-content > *:nth-child(1)  { animation-delay: 0.05s; }
+.sl-markdown-content > *:nth-child(2)  { animation-delay: 0.10s; }
+.sl-markdown-content > *:nth-child(3)  { animation-delay: 0.15s; }
+.sl-markdown-content > *:nth-child(4)  { animation-delay: 0.20s; }
+.sl-markdown-content > *:nth-child(5)  { animation-delay: 0.25s; }
+.sl-markdown-content > *:nth-child(6)  { animation-delay: 0.30s; }
+.sl-markdown-content > *:nth-child(7)  { animation-delay: 0.35s; }
+.sl-markdown-content > *:nth-child(8)  { animation-delay: 0.40s; }
+.sl-markdown-content > *:nth-child(9)  { animation-delay: 0.45s; }
+.sl-markdown-content > *:nth-child(10) { animation-delay: 0.50s; }
+
+/* --- 9. Respeta prefers-reduced-motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- 10. Scrollbar violeta --- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--sl-color-black); }
+::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, 0.7); }
