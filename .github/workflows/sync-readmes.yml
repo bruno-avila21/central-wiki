@@ -1,0 +1,68 @@
+name: Sync README from Project
+
+on:
+  repository_dispatch:
+    types: [readme-updated]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync README
+        env:
+          REPO: ${{ github.event.client_payload.repo }}
+        run: |
+          # Determine category from sync-config.json
+          CATEGORY=$(node -e "
+            const config = require('./sync-config.json');
+            const cat = config[process.env.REPO];
+            if (!cat) { console.error('Repo not in sync-config.json:', process.env.REPO); process.exit(1); }
+            console.log(cat);
+          ")
+
+          echo "Syncing $REPO → $CATEGORY"
+
+          # Fetch README (try main branch, then master)
+          CONTENT=$(curl -sf "https://raw.githubusercontent.com/bruno-avila21/${REPO}/main/README.md" || \
+                    curl -sf "https://raw.githubusercontent.com/bruno-avila21/${REPO}/master/README.md" || \
+                    echo "")
+
+          if [ -z "$CONTENT" ]; then
+            echo "No README.md found in $REPO, skipping"
+            exit 0
+          fi
+
+          # Inject Starlight frontmatter if missing
+          FIRST_LINE=$(echo "$CONTENT" | head -1)
+          if [ "$FIRST_LINE" = "---" ]; then
+            FINAL_CONTENT="$CONTENT"
+          else
+            REPO_TITLE=$(echo "$REPO" | tr '-' ' ' | sed 's/\b\(.\)/\u\1/g')
+            FINAL_CONTENT="---
+          title: $REPO_TITLE
+          description: Documentación de $REPO
+          ---
+
+          $CONTENT"
+          fi
+
+          # Write file to correct category
+          TARGET_DIR="src/content/docs/$CATEGORY"
+          mkdir -p "$TARGET_DIR"
+          FILENAME=$(echo "$REPO" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+          printf '%s\n' "$FINAL_CONTENT" > "$TARGET_DIR/${FILENAME}.md"
+
+          # Commit if there are changes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "[sync] update $REPO README"
+            git push
+          fi

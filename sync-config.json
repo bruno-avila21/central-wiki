@@ -1,0 +1,12 @@
+{
+  "bingo-quiniela": "frontend",
+  "invitaciones": "frontend",
+  "stock-product": "frontend",
+  "AgentSync": "backend",
+  "discord-bot": "backend",
+  "simulador-credito": "backend",
+  "ecommerce-saas": "backend",
+  "gestion-alquileres-saas": "backend",
+  "claude-agents": "agentes",
+  "Investigador": "agentes"
+}
