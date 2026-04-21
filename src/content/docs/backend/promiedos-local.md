@@ -113,6 +113,7 @@ PYTHONPATH=$(pwd) python -m pytest tests/ -v  # 35 tests
 - `_today()` como función de módulo permite monkeypatching en tests.
 - SQLite en modo WAL permite reads concurrentes mientras el scraper escribe.
 - **Tag:** `backend-v1.0`
+- **Selectores calibrados:** CSS Modules con clases hasheadas → `[class*='...']`. Iteración en dos niveles: grupo de liga → filas de partido. `match_id` desde href. Standings en `/league/liga-profesional/hc`, tabla `.destinations` detectada por header "Promedios". Relegation via inline style `rgb(230,16,52)`. H2H en páginas de partido (`/game/{slug}/{id}`), requiere click en "VER MÁS", fecha `DD/MM/YYYY` → ISO. Fixture URL: `/games/DD-MM-YYYY`.
 
 ---
 
