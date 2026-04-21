@@ -1,14 +1,126 @@
 ---
 title: Promiedos Local
-description: Herramienta personal de escritorio para seguir resultados de fútbol en vivo y reproducir streams HLS
+description: Herramienta personal de fútbol en vivo — backend REST API + app de escritorio Tauri+React
 wiki_managed: true
 ---
 
 # Promiedos Local
 
-Herramienta personal de escritorio para seguir resultados de fútbol en vivo, ver standings y reproducir streams de video — sin publicidad, sin paywalls.
+Herramienta personal para seguir resultados de fútbol en vivo, ver fixtures, standings y estadísticas head-to-head — sin publicidad, sin paywalls.
 
-## Tech stack
+El proyecto tiene dos implementaciones separadas:
+
+- **Futbol-Promiedos/backend/** — API REST standalone (v1.0, activa)
+- **Futbol/** — App de escritorio completa Tauri 2 + React 19 (referencia)
+
+---
+
+## Backend API (v1.0) — `Futbol-Promiedos/backend/`
+
+API REST Python con scrapers Playwright para consumir datos de promiedos.com.ar.
+
+### Tech stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Lenguaje | Python 3.14 |
+| Framework | FastAPI + uvicorn |
+| Scraping | Playwright (sync) |
+| Scheduler | APScheduler 3.x (BackgroundScheduler) |
+| Base de datos | SQLite + WAL mode |
+| Validación | Pydantic v2 |
+| Tests | pytest + pytest-asyncio + httpx |
+
+### Arquitectura
+
+```
+[APScheduler] ──► [LiveScraper/FixtureScraper] ──► [SQLite]
+                                                        │
+                                              [FastAPI :8000]
+                                                        │
+                              ┌─────────────────────────┤
+                              ▼                         ▼
+                   GET /matches/live           GET /standings
+                   GET /matches/today          GET /teams
+                   GET /matches?date=&league=  GET /h2h/{a}/{b}
+                                               GET /status
+```
+
+### Scrapers
+
+| Scraper | Descripción |
+|---------|-------------|
+| `base_scraper.py` | Base con `try_selectors()` + multi-fallback selector pattern |
+| `live_scraper.py` | Partidos en vivo — `_get_match_rows()` itera selectores alternativos |
+| `fixture_scraper.py` | Fixture por fecha — `navigate(date)` → `/fixture/{date}` |
+| `standings_scraper.py` | Tabla de posiciones con `avg_points` y `relegation_zone` |
+| `h2h_scraper.py` | Head-to-head entre dos equipos — normaliza orden con `min/max` |
+
+### Endpoints API
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/matches/live` | Partidos en vivo desde SQLite |
+| `GET` | `/matches/today` | Partidos del día |
+| `GET` | `/matches` | Partidos filtrados por `date=` y `league=` |
+| `GET` | `/standings` | Tabla de posiciones (`season=` opcional, default "2025") |
+| `GET` | `/teams` | Lista de equipos registrados |
+| `GET` | `/h2h/{team_a_id}/{team_b_id}` | Historial head-to-head (orden normalizado) |
+| `GET` | `/status` | Estado del scraper — último run por tipo, tamaño DB |
+
+### Estructura del proyecto
+
+```
+backend/
+├── api/
+│   ├── routes/
+│   │   ├── matches.py     # GET /matches/*
+│   │   ├── standings.py   # GET /standings
+│   │   ├── h2h.py         # GET /teams, /h2h
+│   │   └── status.py      # GET /status
+│   └── schemas.py         # Modelos Pydantic v2
+├── scrapers/
+│   ├── base_scraper.py
+│   ├── live_scraper.py
+│   ├── fixture_scraper.py
+│   ├── standings_scraper.py
+│   └── h2h_scraper.py
+├── database/              # connection.py + schema.sql
+├── tests/                 # 35 tests (unit + API)
+│   └── fixtures/          # HTML de prueba por scraper
+├── config.py
+├── main.py                # create_app() + lifespan (APScheduler)
+└── requirements.txt
+```
+
+### Desarrollo local
+
+```bash
+cd Futbol-Promiedos/backend
+pip install -r requirements.txt
+playwright install chromium
+uvicorn backend.main:app --port 8000 --reload
+
+# Tests
+PYTHONPATH=$(pwd) python -m pytest tests/ -v  # 35 tests
+```
+
+### Notas de implementación
+
+- `_get_match_rows()` / `_get_rows()` itera todos los selectores de fallback — nunca hardcodea `[0]`.
+- `league` se extrae de `data-league` o `try_selectors()` — nunca default hardcodeado.
+- El H2H SQL normaliza el orden de equipos: `MIN(team_a_id) = min(a,b)` y `MAX(team_b_id) = max(a,b)`.
+- `_today()` como función de módulo permite monkeypatching en tests.
+- SQLite en modo WAL permite reads concurrentes mientras el scraper escribe.
+- **Tag:** `backend-v1.0`
+
+---
+
+## App de escritorio — `Futbol/`
+
+Implementación completa con UI Tauri 2 + React 19.
+
+### Tech stack
 
 | Capa | Tecnología |
 |------|-----------|
@@ -22,7 +134,7 @@ Herramienta personal de escritorio para seguir resultados de fútbol en vivo, ve
 | Video | Video.js 8 + HLS.js |
 | Tests | pytest (Python) + vitest + Testing Library (UI) |
 
-## Arquitectura
+### Arquitectura
 
 **Invariante principal:** La UI nunca hace requests a sitios externos. Todo el tráfico pasa por `localhost:8765`.
 
@@ -37,74 +149,20 @@ Herramienta personal de escritorio para seguir resultados de fútbol en vivo, ve
                                          [Video.js reproduce]
 ```
 
-### Módulos
+### Módulos clave
 
-- **scraper/engine.py** — Scrapea resultados y standings. Lee selectores desde `selectors.json` en runtime. Si el sitio cambia, solo actualizar el JSON.
-- **scraper/interceptor.py** — Captura URLs `.m3u8` interceptando la red del browser Playwright. Lazy: solo corre cuando el usuario clickea "Ver".
-- **scraper/scheduler.py** — APScheduler: refresco cada 60s si hay partidos live, cada 5min si no.
-- **api/routes/stream.py** — Proxy HLS que reescribe todas las URLs de segmentos `.ts` y playlists `.m3u8` anidadas para que pasen por el proxy. Video.js nunca contacta el CDN directamente.
+- **scraper/engine.py** — Lee selectores desde `selectors.json` en runtime. Si el sitio cambia, solo actualizar el JSON.
+- **scraper/interceptor.py** — Captura URLs `.m3u8` interceptando la red del browser Playwright.
+- **scraper/scheduler.py** — Refresco cada 60s live, cada 5min sin partidos.
+- **api/routes/stream.py** — Proxy HLS que reescribe 100% de las URLs de segmentos.
 
-### TTL de cache
+### Tests
 
-| Tabla | TTL |
-|-------|-----|
-| matches (live) | 90 seg |
-| matches (programado) | 15 min |
-| standings | 15 min |
-| streams | 4 horas |
+- **Python:** 17 tests (14 unit + 3 integration)
+- **UI (vitest):** 13 tests (client, MatchCard, VideoPlayer, StandingsTable)
 
-## Estructura del proyecto
+### Notas de implementación
 
-```
-promiedos-local/
-├── scraper/           # engine.py, interceptor.py, scheduler.py, selectors.json
-├── api/               # FastAPI app + routes + db.py + models.py
-├── database/          # schema.sql
-├── ui/                # Tauri 2 + React 19
-│   ├── src/           # components, pages, hooks, api client
-│   └── src-tauri/     # Rust shell, tauri.conf.json
-└── tests/             # unit + integration (30 tests)
-```
-
-## Endpoints API
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/matches` | Partidos del día desde SQLite |
-| `GET` | `/api/standings?league=` | Tabla de posiciones |
-| `POST` | `/api/streams/capture` | Lanza interceptor para capturar m3u8 |
-| `GET` | `/stream?url=` | Proxy HLS (reescribe URLs de segmentos) |
-| `GET` | `/health` | Healthcheck |
-
-## Páginas UI
-
-- **Home (`/`)** — Grid de partidos filtrable por liga. Badge LIVE pulsante. Botón "Ver" solo en partidos en vivo. Polling 60s.
-- **Live (`/live/:matchId`)** — Lanza captura de stream al navegar → VideoPlayer con HLS.js. Muestra marcador en tiempo real.
-- **Standings (`/standings`)** — Tabla de posiciones por liga con diferencia de gol coloreada.
-
-## Desarrollo local
-
-```bash
-# Backend
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-playwright install chromium
-uvicorn api.main:app --port 8765 --reload
-
-# UI (en otra terminal)
-cd ui
-npm install
-npm run dev
-
-# Tests
-pytest tests/ -v          # 17 tests Python
-cd ui && npm run test     # 13 tests UI
-```
-
-## Notas de implementación
-
-- **playwright-stealth** requiere `setuptools < 67` (usa `pkg_resources` removido en setuptools 82+).
-- **Tailwind v4** requiere el plugin `@tailwindcss/vite` — no usa PostCSS.
-- El proxy HLS reescribe 100% de las URLs: master playlist → variant playlists → segmentos `.ts`. Video.js nunca ve una URL de CDN.
-- `selectors.json` es el único archivo a editar si cambia el HTML del sitio fuente.
+- **playwright-stealth** requiere `setuptools < 67`.
+- **Tailwind v4** requiere `@tailwindcss/vite` — no PostCSS.
+- El proxy HLS reescribe: master playlist → variant playlists → segmentos `.ts`.

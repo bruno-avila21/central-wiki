@@ -10,7 +10,10 @@ Registro cronológico de lo más relevante que se fue sumando al ecosistema.
 
 ## Abril 2026
 
-### Promiedos Local — Herramienta de fútbol en vivo
+### Promiedos Local — Backend API v1.0
+API REST standalone en Python 3.14 + FastAPI con scrapers Playwright para live matches, fixture, standings y head-to-head. SQLite + WAL mode, APScheduler, Pydantic v2. **35 tests** (pytest). Taggeado `backend-v1.0`. Multi-selector fallback en todos los scrapers — si cambia el HTML del sitio, no rompe.
+
+### Promiedos Local — App de escritorio
 App de escritorio personal (Tauri 2 + React 19) para seguir resultados en vivo y reproducir streams HLS. Backend FastAPI en Python con scraper Playwright, proxy HLS con reescritura de URLs, y cache SQLite local. **30 tests** (17 Python + 13 UI). La UI nunca contacta sitios externos — todo pasa por `localhost:8765`.
 
 ### Wiki — Rediseño UI Deep Space
