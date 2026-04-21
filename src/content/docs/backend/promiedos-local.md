@@ -158,7 +158,7 @@ Implementación completa con UI Tauri 2 + React 19.
 
 ### Tests
 
-- **Python:** 17 tests (14 unit + 3 integration)
+- **Python:** 20 tests (17 unit + 3 integration)
 - **UI (vitest):** 13 tests (client, MatchCard, VideoPlayer, StandingsTable)
 
 ### Notas de implementación
@@ -166,3 +166,4 @@ Implementación completa con UI Tauri 2 + React 19.
 - **playwright-stealth** requiere `setuptools < 67`.
 - **Tailwind v4** requiere `@tailwindcss/vite` — no PostCSS.
 - El proxy HLS reescribe: master playlist → variant playlists → segmentos `.ts`.
+- **Selectores CSS Modules:** promiedos.com.ar usa Next.js con clases hasheadas. Todos los selectores usan `[class*='...']` para matchear el prefijo estable. El match_id se extrae del último segmento del `href` (no de un atributo `data-*`). El marcador es un único campo `"X - Y"` (no separado por equipo), y la columna de goles en la tabla tiene formato `"17:7"` (gf:ga separado por `:`). Iteración en dos niveles: grupo de liga → filas de partido.
