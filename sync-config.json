@@ -8,5 +8,6 @@
   "ecommerce-saas": "backend",
   "gestion-alquileres-saas": "backend",
   "claude-agents": "agentes",
-  "Investigador": "agentes"
+  "Investigador": "agentes",
+  "mediavault": "backend"
 }
