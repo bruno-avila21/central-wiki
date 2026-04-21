@@ -10,6 +10,9 @@ Registro cronológico de lo más relevante que se fue sumando al ecosistema.
 
 ## Abril 2026
 
+### Promiedos Local — Herramienta de fútbol en vivo
+App de escritorio personal (Tauri 2 + React 19) para seguir resultados en vivo y reproducir streams HLS. Backend FastAPI en Python con scraper Playwright, proxy HLS con reescritura de URLs, y cache SQLite local. **30 tests** (17 Python + 13 UI). La UI nunca contacta sitios externos — todo pasa por `localhost:8765`.
+
 ### Wiki — Rediseño UI Deep Space
 Nuevo tema visual completo: paleta **Deep Space** (fondo casi negro + violeta `#7c3aed`), estilo Minimal Sharp (sin glass effects, tipografía dominante) y animaciones Emil Kowalski (`slideInLeft` + `fadeUpIn` con spring easing). Soporte completo de light mode con variante violeta profesional.
 
@@ -38,6 +41,7 @@ Se extendió la funcionalidad para los equipos de QA y Administración y Finanza
 | Proyecto | Última actividad | Estado |
 |----------|-----------------|--------|
 | AgentSync | Abril 2026 | Activo |
+| Promiedos Local | Abril 2026 | Activo |
 | claude-agents | Abril 2026 | Activo |
 | stock-product | 2025 | Mantenimiento |
 | bingo-quiniela | 2025 | Estable |
