@@ -10,6 +10,9 @@ Registro cronológico de lo más relevante que se fue sumando al ecosistema.
 
 ## Abril 2026
 
+### Promiedos Local — App Flutter (Windows + Android)
+App Flutter 3.41 multiplataforma que consume el backend REST. Riverpod 2.5 para estado, `http` 1.2, `shared_preferences` para persistir la base URL del backend, `shimmer` y `dropdown_search` para UX. 4 pestañas (Hoy, Promedios, H2H, Config), tema oscuro con tokens centralizados, live badge animado con pulse. **8 tests** (pytest Dart), `flutter analyze` sin issues. Taggeado `flutter-v1.0`.
+
 ### Promiedos Local — Backend API v1.0
 API REST standalone en Python 3.14 + FastAPI con scrapers Playwright para live matches, fixture, standings y head-to-head. SQLite + WAL mode, APScheduler, Pydantic v2. **35 tests** (pytest). Taggeado `backend-v1.0`. Multi-selector fallback en todos los scrapers — si cambia el HTML del sitio, no rompe.
 
@@ -44,7 +47,7 @@ Se extendió la funcionalidad para los equipos de QA y Administración y Finanza
 | Proyecto | Última actividad | Estado |
 |----------|-----------------|--------|
 | AgentSync | Abril 2026 | Activo |
-| Promiedos Local | Abril 2026 | Activo |
+| Promiedos Local | Abril 2026 | Activo (3 implementaciones) |
 | claude-agents | Abril 2026 | Activo |
 | stock-product | 2025 | Mantenimiento |
 | bingo-quiniela | 2025 | Estable |
