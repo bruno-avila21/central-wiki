@@ -19,25 +19,30 @@ jobs:
         env:
           REPO: ${{ github.event.client_payload.repo }}
         run: |
-          # Determine category from sync-config.json
-          CATEGORY=$(node -e "
+          # Determine category and readme path from sync-config.json
+          # Supports both string values ("category") and object values ({ category, readmePath })
+          PARSED=$(node -e "
             const config = require('./sync-config.json');
-            const cat = config[process.env.REPO];
-            if (!cat) { console.error('Repo not in sync-config.json:', process.env.REPO); process.exit(1); }
-            console.log(cat);
+            const entry = config[process.env.REPO];
+            if (!entry) { console.error('Repo not in sync-config.json:', process.env.REPO); process.exit(1); }
+            const category = typeof entry === 'string' ? entry : entry.category;
+            const readmePath = typeof entry === 'string' ? 'README.md' : (entry.readmePath || 'README.md');
+            console.log(category + '|' + readmePath);
           ")
+          CATEGORY=$(echo "$PARSED" | cut -d'|' -f1)
+          README_PATH=$(echo "$PARSED" | cut -d'|' -f2)
 
-          echo "Syncing $REPO → $CATEGORY"
+          echo "Syncing $REPO → $CATEGORY (path: $README_PATH)"
 
-          # Fetch README (try main branch, then master) — auth header supports private repos
+          # Fetch README — try main, master, desarrollo branches
           AUTH_HEADER="Authorization: token ${{ secrets.WIKI_SYNC_TOKEN }}"
-          CONTENT=$(curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/main/README.md" || \
-                    curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/master/README.md" || \
-                    curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/desarrollo/README.md" || \
+          CONTENT=$(curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/main/${README_PATH}" || \
+                    curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/master/${README_PATH}" || \
+                    curl -sf -H "$AUTH_HEADER" "https://raw.githubusercontent.com/bruno-avila21/${REPO}/desarrollo/${README_PATH}" || \
                     echo "")
 
           if [ -z "$CONTENT" ]; then
-            echo "No README.md found in $REPO, skipping"
+            echo "No README.md found in $REPO at $README_PATH, skipping"
             exit 0
           fi
 

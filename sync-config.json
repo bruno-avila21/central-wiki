@@ -10,5 +10,5 @@
   "claude-agents": "agentes",
   "Investigador": "agentes",
   "mediavault": "backend",
-  "billing-saas": "backend"
+  "billing-saas": { "category": "backend", "readmePath": "Proyectos_Propios/billing-saas/README.md" }
 }
