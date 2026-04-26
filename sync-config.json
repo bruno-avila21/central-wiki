@@ -1,6 +1,5 @@
 {
   "bingo-quiniela": "frontend",
-  "invitaciones": "frontend",
   "stock-product": "frontend",
   "AgentSync": "backend",
   "discord-bot": "backend",
@@ -9,6 +8,12 @@
   "gestion-alquileres-saas": "backend",
   "claude-agents": "agentes",
   "Investigador": "agentes",
-  "mediavault": "backend",
-  "billing-saas": { "category": "backend", "readmePath": "Proyectos_Propios/billing-saas/README.md" }
+  "billing-saas": { "category": "backend", "readmePath": "Proyectos_Propios/billing-saas/README.md" },
+  "mediavault": { "category": "backend", "readmePath": "Proyectos_Propios/Peliculas-Series/README.md" },
+  "invitation-builder": { "category": "frontend", "readmePath": "Proyectos_Propios/invitation-builder/README.md" },
+  "CopyPage": { "category": "frontend", "readmePath": "Proyectos_Propios/CopyPage/README.md" },
+  "Futbol": { "category": "backend", "readmePath": "Proyectos_Propios/Futbol/README.md" },
+  "Futbol-Promiedos": { "category": "backend", "readmePath": "Proyectos_Propios/Futbol-Promiedos/README.md" },
+  "ai-website-cloner-ref": { "category": "agentes", "readmePath": "Proyectos_Propios/ai-website-cloner-ref/README.md" },
+  "layout-saas": { "category": "backend", "readmePath": "Proyectos_Propios/layout-saas/README.md" }
 }
