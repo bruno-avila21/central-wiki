@@ -9,5 +9,6 @@
   "gestion-alquileres-saas": "backend",
   "claude-agents": "agentes",
   "Investigador": "agentes",
-  "mediavault": "backend"
+  "mediavault": "backend",
+  "billing-saas": "backend"
 }
